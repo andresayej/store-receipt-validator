@@ -7,8 +7,8 @@ use ReceiptValidator\RunTimeException;
 
 class Validator
 {
-    const ENDPOINT_SANDBOX = 'https://sandbox.itunes.apple.com/verifyReceipt';
-    const ENDPOINT_PRODUCTION = 'https://buy.itunes.apple.com/verifyReceipt';
+    const ENDPOINT_SANDBOX = 'https://sandbox.itunes.apple.com';
+    const ENDPOINT_PRODUCTION = 'https://buy.itunes.apple.com';
 
     /**
      * endpoint url.
@@ -92,7 +92,7 @@ class Validator
      *
      * @return $this
      */
-    public function setReceiptData($receipt_data): self
+    public function setReceiptData(?string $receipt_data = null): self
     {
         if (strpos($receipt_data, '{') !== false) {
             $this->receipt_data = base64_encode($receipt_data);
@@ -116,7 +116,7 @@ class Validator
      *
      * @return $this
      */
-    public function setSharedSecret($shared_secret = null): self
+    public function setSharedSecret(?string $shared_secret = null): self
     {
         $this->shared_secret = $shared_secret;
 
@@ -202,10 +202,9 @@ class Validator
      */
     protected function getClientConfig(): array
     {
-        $baseUri = ['base_uri' => $this->endpoint];
-        $clientConfig = array_merge($this->request_options, $baseUri);
+        $base_uri = ['base_uri' => $this->endpoint];
 
-        return $clientConfig;
+        return array_merge($this->request_options, $base_uri);
     }
 
     /**
@@ -277,7 +276,7 @@ class Validator
     {
         $baseUri = (string) $client->getConfig('base_uri');
 
-        $httpResponse = $client->request('POST', null, ['body' => $this->prepareRequestData()]);
+        $httpResponse = $client->request('POST', '/verifyReceipt', ['body' => $this->prepareRequestData()]);
 
         if ($httpResponse->getStatusCode() !== 200) {
             throw new RunTimeException('Unable to get response from itunes server');
